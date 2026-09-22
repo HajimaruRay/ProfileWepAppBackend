@@ -1,22 +1,54 @@
+import fs from 'node:fs';
 import mysql from 'mysql2/promise';
-import dotenv from 'dotenv';
 import { env } from './config/env.js';
 
-dotenv.config();
+let pool;
 
-const DB_CONFIG = {
-    host: env.host,
-    user: env.user,
-    password: env.password,
-    database: env.database
+const buildSslConfig = () => {
+    if (!env.db.ssl) {
+        return undefined;
+    }
+
+    if (env.db.sslCa) {
+        return {
+            ca: env.db.sslCa.replaceAll('\\n', '\n'),
+            rejectUnauthorized: true,
+        };
+    }
+
+    if (env.db.sslCaPath) {
+        return {
+            ca: fs.readFileSync(env.db.sslCaPath, 'utf8'),
+            rejectUnauthorized: true,
+        };
+    }
+
+    return {
+        rejectUnauthorized: env.db.sslRejectUnauthorized,
+    };
 };
 
-let connection;
-
 export const getConnection = async () => {
-    if (!connection) {
-        connection = await mysql.createConnection(DB_CONFIG);
-        console.log('Database connection established');
+    if (!pool) {
+        if (!env.db.host || !env.db.user || !env.db.database) {
+            throw new Error('Set DB_HOST, DB_USER, and DB_NAME in the backend environment variables.');
+        }
+        if (!Number.isInteger(env.db.port) || env.db.port < 1 || env.db.port > 65535) {
+            throw new Error('DB_PORT must be an integer between 1 and 65535.');
+        }
+
+        pool = mysql.createPool({
+            host: env.db.host,
+            port: env.db.port,
+            user: env.db.user,
+            password: env.db.password,
+            database: env.db.database,
+            ssl: buildSslConfig(),
+            waitForConnections: true,
+            connectionLimit: 10,
+            connectTimeout: 10000,
+        });
     }
-    return connection;
-}
+
+    return pool;
+};

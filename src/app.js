@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import healthCheckRoutes from './routes/healthCheck.js';
+import loginRoutes from './routes/login.js';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 app.use('/api', healthCheckRoutes);
+app.use('/api', loginRoutes);
 
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
@@ -42,4 +44,3 @@ app.use((err, req, res, next) => {
 });
 
 export default app;
-
