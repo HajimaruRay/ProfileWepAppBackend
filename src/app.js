@@ -22,6 +22,14 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    message: 'Profile web app backend is running',
+    healthCheck: '/api/v1.0/healthCheck',
+  });
+});
+
 app.use('/api', healthCheckRoutes);
 app.use('/api', loginRoutes);
 app.use('/api', registerRoutes);
