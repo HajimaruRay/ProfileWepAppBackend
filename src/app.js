@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import healthCheckRoutes from './routes/healthCheck.js';
 import loginRoutes from './routes/login.js';
+import logoutRoutes from './routes/logout.js';
 import registerRoutes from './routes/register.js';
 
 dotenv.config();
@@ -32,6 +33,7 @@ app.get('/', (req, res) => {
 
 app.use('/api', healthCheckRoutes);
 app.use('/api', loginRoutes);
+app.use('/api', logoutRoutes);
 app.use('/api', registerRoutes);
 
 app.use((err, req, res, next) => {
