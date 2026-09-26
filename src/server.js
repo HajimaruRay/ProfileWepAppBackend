@@ -1,23 +1,18 @@
 import app from './app.js';
+import healthController from './controllers/healthController.js';
 
 const PORT = process.env.PORT || 3000;
 const HEALTH_CHECK_INTERVAL_MS = 60 * 60 * 1000;
 
 async function callHealthCheck() {
-  const healthCheckUrl = process.env.HEALTH_CHECK_URL || `http://localhost:${PORT}/api/v1.0/healthCheck`;
+  const healthStatus = await healthController.getHealthStatus();
 
-  try {
-    const response = await fetch(healthCheckUrl);
-
-    if (!response.ok) {
-      console.error(`Health check request failed with status ${response.status}`);
-      return;
-    }
-
-    console.log('Health check request completed successfully.');
-  } catch (error) {
-    console.error('Health check request failed:', error);
+  if (healthStatus.status === 'success') {
+    console.log('Health check completed successfully.');
+    return;
   }
+
+  console.error(`Health check failed with status ${healthStatus.httpStatus}`);
 }
 
 function startHourlyHealthCheck() {

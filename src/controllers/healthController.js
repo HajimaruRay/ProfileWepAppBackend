@@ -7,26 +7,33 @@ class HealthController {
     await connection.execute('SELECT 1 AS health_check');
   }
 
-  async checkHealth(req, res) {
+  async getHealthStatus() {
     try {
       await this.checkDatabaseConnection();
 
-      return res.status(200).json({
+      return {
+        httpStatus: 200,
         status: 'success',
         timestamp: await getCurrentTime(),
         message: 'Server is healthy',
         database: 'connected',
-      });
+      };
     } catch (error) {
       console.error('Health check failed:', error);
 
-      return res.status(503).json({
+      return {
+        httpStatus: 503,
         status: 'error',
         timestamp: await getCurrentTime(),
         message: 'Server is unhealthy',
         database: 'disconnected',
-      });
+      };
     }
+  }
+
+  async checkHealth(req, res) {
+    const { httpStatus, ...healthStatus } = await this.getHealthStatus();
+    return res.status(httpStatus).json(healthStatus);
   }
 }
 
