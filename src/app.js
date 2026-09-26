@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import healthCheckRoutes from './routes/healthCheck.js';
 import loginRoutes from './routes/login.js';
+import registerRoutes from './routes/register.js';
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use(express.json());
 
 app.use('/api', healthCheckRoutes);
 app.use('/api', loginRoutes);
+app.use('/api', registerRoutes);
 
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
